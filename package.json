@@ -1,0 +1,42 @@
+{
+  "name": "mockx",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbo",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "next": "^15.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "better-auth": "^1.2.7",
+    "drizzle-orm": "^0.41.0",
+    "@neondatabase/serverless": "^0.10.4",
+    "html2canvas": "^1.4.1",
+    "lucide-react": "^0.483.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.2.0",
+    "resend": "^4.5.1",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "tailwindcss": "^3.4.17",
+    "postcss": "^8.5.3",
+    "autoprefixer": "^10.4.21",
+    "drizzle-kit": "^0.30.4",
+    "eslint": "^9.24.0",
+    "eslint-config-next": "^15.3.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.2",
+    "@types/node": "^22.15.2"
+  }
+}
