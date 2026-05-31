@@ -2,8 +2,8 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { signOut } from "@/lib/auth-client";
-import { LayoutDashboard, Monitor, Laptop, Images, Settings, LogOut } from "lucide-react";
+
+import { LayoutDashboard, Monitor, Laptop, Images, Settings } from "lucide-react";
 
 const NAV = [
   { href: "/app/dashboard", label: "Dashboard",    icon: LayoutDashboard },

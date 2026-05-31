@@ -1,71 +1,100 @@
 "use client";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { MacOSMenuBar } from "@/components/macos/menubar";
-import { MacOSDock } from "@/components/macos/dock";
-import { SafariFrame } from "@/components/frames/safari";
-import { ChromeFrame } from "@/components/frames/chrome";
-import { ArcFrame } from "@/components/frames/arc";
+import { MacOSDock }    from "@/components/macos/dock";
+import { SafariFrame }  from "@/components/frames/safari";
+import { ChromeFrame }  from "@/components/frames/chrome";
+import { ArcFrame }     from "@/components/frames/arc";
+import { FirefoxFrame } from "@/components/frames/firefox";
 import { FRAMES, type FrameId } from "@/components/frames";
 import { MacBookAir13 } from "@/components/macbook/macbook-air-13";
+import { MacBookAir15 } from "@/components/macbook/macbook-air-15";
 import { MacBookPro14 } from "@/components/macbook/macbook-pro-14";
+import { MacBookPro16 } from "@/components/macbook/macbook-pro-16";
 import { MACBOOK_MODELS } from "@/components/macbook";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Sun, Moon, Download, Save, Upload, X, Laptop } from "lucide-react";
+import { Input }  from "@/components/ui/input";
+import { Sun, Moon, Download, Save, Upload, X, Laptop, Check, Loader2 } from "lucide-react";
 
+/* ─── constants ────────────────────────────────────────────── */
 const DESK_ENVS = [
-  { id: "wood-dark",   label: "Dark Wood",    bg: "radial-gradient(ellipse at 50% 100%,#2c1810 0%,#1a0f08 60%,#0d0805 100%)", surface: "linear-gradient(180deg,#3d2214,#2c1810)" },
-  { id: "glass",       label: "Glass Desk",   bg: "radial-gradient(ellipse at 50% 100%,#1a2035 0%,#0f1420 60%,#080c14 100%)", surface: "linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))" },
-  { id: "minimal",     label: "Minimal",      bg: "radial-gradient(ellipse at 50% 100%,#f5f5f7 0%,#e8e8ec 100%)",             surface: "linear-gradient(180deg,#ffffff,#f0f0f5)" },
-  { id: "dark-studio", label: "Dark Studio",  bg: "radial-gradient(ellipse at 50% 80%,#0f0f14 0%,#060608 100%)",             surface: "linear-gradient(180deg,#1a1a22,#111116)" },
-  { id: "floating",    label: "Floating",     bg: "transparent",                                                              surface: "transparent" },
+  { id: "wood-dark",   label: "Dark Wood",   bg: "radial-gradient(ellipse at 50% 100%,#2c1810 0%,#1a0f08 60%,#0d0805 100%)", surface: "linear-gradient(180deg,#3d2214,#2c1810)" },
+  { id: "glass",       label: "Glass Desk",  bg: "radial-gradient(ellipse at 50% 100%,#1a2035 0%,#0f1420 60%,#080c14 100%)", surface: "linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))" },
+  { id: "minimal",     label: "Minimal",     bg: "radial-gradient(ellipse at 50% 100%,#f5f5f7 0%,#e8e8ec 100%)",             surface: "linear-gradient(180deg,#ffffff,#f0f0f5)" },
+  { id: "dark-studio", label: "Dark Studio", bg: "radial-gradient(ellipse at 50% 80%,#0f0f14 0%,#060608 100%)",             surface: "linear-gradient(180deg,#1a1a22,#111116)" },
+  { id: "floating",    label: "Floating",    bg: "transparent",                                                              surface: "transparent" },
 ];
 
 const OUTER_BGS = [
-  { id: "dark-1",   bg: "#0a0c10" },
-  { id: "dark-2",   bg: "linear-gradient(135deg,#0f0c29,#302b63)" },
-  { id: "purple",   bg: "linear-gradient(135deg,#1a0533,#3b0764)" },
-  { id: "teal",     bg: "linear-gradient(135deg,#004d40,#00251a)" },
-  { id: "light",    bg: "linear-gradient(135deg,#e8eaf6,#c5cae9)" },
-  { id: "white",    bg: "#f5f5f7" },
+  { id: "dark-1",  bg: "#0a0c10" },
+  { id: "dark-2",  bg: "linear-gradient(135deg,#0f0c29,#302b63)" },
+  { id: "purple",  bg: "linear-gradient(135deg,#1a0533,#3b0764)" },
+  { id: "teal",    bg: "linear-gradient(135deg,#004d40,#00251a)" },
+  { id: "light",   bg: "linear-gradient(135deg,#e8eaf6,#c5cae9)" },
+  { id: "white",   bg: "#f5f5f7" },
 ];
 
 const WALLPAPERS = [
-  { id: "sonoma",    bg: "linear-gradient(135deg,#1a1a2e,#16213e,#0f3460,#533483)" },
-  { id: "sequoia",   bg: "linear-gradient(160deg,#0d1b2a,#1b4332,#74c69d)" },
-  { id: "slate",     bg: "linear-gradient(135deg,#0f0c29,#302b63,#24243e)" },
-  { id: "ventura",   bg: "linear-gradient(145deg,#667eea,#764ba2,#f093fb)" },
-  { id: "dark",      bg: "#111113" },
-  { id: "light",     bg: "linear-gradient(145deg,#e8eaf6,#c5cae9,#e3f2fd)" },
+  { id: "sonoma",  bg: "linear-gradient(135deg,#1a1a2e,#16213e,#0f3460,#533483)" },
+  { id: "sequoia", bg: "linear-gradient(160deg,#0d1b2a,#1b4332,#74c69d)" },
+  { id: "slate",   bg: "linear-gradient(135deg,#0f0c29,#302b63,#24243e)" },
+  { id: "ventura", bg: "linear-gradient(145deg,#667eea,#764ba2,#f093fb)" },
+  { id: "dark",    bg: "#111113" },
+  { id: "light",   bg: "linear-gradient(145deg,#e8eaf6,#c5cae9,#e3f2fd)" },
 ];
 
+/* ─── frame helper ─────────────────────────────────────────── */
 function renderFrame(id: FrameId, screenshot: string | null, url: string, mode: "dark"|"light") {
   const p = { screenshot, url, mode };
-  if (id === "chrome")   return <ChromeFrame {...p} />;
-  if (id === "arc")      return <ArcFrame   {...p} />;
-  return                        <SafariFrame {...p} />;
+  if (id === "chrome")  return <ChromeFrame  {...p} />;
+  if (id === "arc")     return <ArcFrame     {...p} />;
+  if (id === "firefox") return <FirefoxFrame {...p} />;
+  return                       <SafariFrame  {...p} />;
 }
 
+/* ─── macbook shell ────────────────────────────────────────── */
 function MacBookShell({ modelId, colorId, children }: { modelId: string; colorId: string; children: React.ReactNode }) {
-  if (modelId === "pro-14" || modelId === "pro-16") {
-    return <MacBookPro14 color={colorId as any}>{children}</MacBookPro14>;
-  }
-  return <MacBookAir13 color={colorId as any}>{children}</MacBookAir13>;
+  if (modelId === "pro-16") return <MacBookPro16 color={colorId as "spaceblack"|"silver"}>{children}</MacBookPro16>;
+  if (modelId === "pro-14") return <MacBookPro14 color={colorId as "spaceblack"|"silver"}>{children}</MacBookPro14>;
+  if (modelId === "air-15") return <MacBookAir15 color={colorId as "silver"|"starlight"|"midnight"|"skyblue"}>{children}</MacBookAir15>;
+  return                           <MacBookAir13 color={colorId as "silver"|"starlight"|"midnight"|"skyblue"}>{children}</MacBookAir13>;
 }
 
-export function SceneEditor() {
-  const [modelId, setModelId]       = useState("pro-14");
-  const [colorId, setColorId]       = useState("spaceblack");
-  const [deskEnv, setDeskEnv]       = useState(DESK_ENVS[0]);
-  const [outerBg, setOuterBg]       = useState(OUTER_BGS[0]);
-  const [dayNight, setDayNight]     = useState<"night"|"day">("night");
-  const [wallpaper, setWallpaper]   = useState(WALLPAPERS[0]);
-  const [frame, setFrame]           = useState<FrameId>("safari");
-  const [mode, setMode]             = useState<"dark"|"light">("dark");
-  const [url, setUrl]               = useState("https://yoursite.com");
-  const [screenshot, setScreenshot] = useState<string|null>(null);
-  const [dragging, setDragging]     = useState(false);
-  const [exporting, setExporting]   = useState(false);
+/* ─── types ─────────────────────────────────────────────────── */
+export interface SceneConfig {
+  modelId: string;
+  colorId: string;
+  deskEnvId: string;
+  outerBgId: string;
+  dayNight: "night"|"day";
+  wallpaperId: string;
+  frame: FrameId;
+  mode: "dark"|"light";
+  url: string;
+  screenshot: string | null;
+}
+
+interface SceneEditorProps {
+  mockupId?: string;
+  initialConfig?: SceneConfig;
+}
+
+/* ─── component ──────────────────────────────────────────────── */
+export function SceneEditor({ mockupId, initialConfig }: SceneEditorProps) {
+  const [modelId,    setModelId]    = useState(initialConfig?.modelId    ?? "pro-14");
+  const [colorId,    setColorId]    = useState(initialConfig?.colorId    ?? "spaceblack");
+  const [deskEnvId,  setDeskEnvId]  = useState(initialConfig?.deskEnvId  ?? DESK_ENVS[0].id);
+  const [outerBgId,  setOuterBgId]  = useState(initialConfig?.outerBgId  ?? OUTER_BGS[0].id);
+  const [dayNight,   setDayNight]   = useState<"night"|"day">(initialConfig?.dayNight ?? "night");
+  const [wallpaperId,setWallpaperId]= useState(initialConfig?.wallpaperId ?? WALLPAPERS[0].id);
+  const [frame,      setFrame]      = useState<FrameId>(initialConfig?.frame ?? "safari");
+  const [mode,       setMode]       = useState<"dark"|"light">(initialConfig?.mode ?? "dark");
+  const [url,        setUrl]        = useState(initialConfig?.url         ?? "https://yoursite.com");
+  const [screenshot, setScreenshot] = useState<string|null>(initialConfig?.screenshot ?? null);
+  const [dragging,   setDragging]   = useState(false);
+  const [exporting,  setExporting]  = useState(false);
+  const [saveState,  setSaveState]  = useState<"idle"|"saving"|"saved"|"error">("idle");
+  const [mockupTitle,setMockupTitle]= useState("");
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileRef   = useRef<HTMLInputElement>(null);
@@ -86,8 +115,7 @@ export function SceneEditor() {
   }, []);
 
   const onDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragging(false);
+    e.preventDefault(); setDragging(false);
     const file = e.dataTransfer.files[0];
     if (file?.type.startsWith("image/")) readFile(file);
   }, [readFile]);
@@ -107,9 +135,31 @@ export function SceneEditor() {
     }
   };
 
+  const handleSave = async () => {
+    setSaveState("saving");
+    try {
+      const config: SceneConfig = { modelId, colorId, deskEnvId, outerBgId, dayNight, wallpaperId, frame, mode, url, screenshot };
+      const method = mockupId ? "PATCH" : "POST";
+      const apiUrl = mockupId ? `/api/mockups/${mockupId}` : "/api/mockups";
+      const res = await fetch(apiUrl, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "scene", title: mockupTitle || null, config }),
+      });
+      if (!res.ok) throw new Error();
+      setSaveState("saved");
+      setTimeout(() => setSaveState("idle"), 2500);
+    } catch {
+      setSaveState("error");
+      setTimeout(() => setSaveState("idle"), 2500);
+    }
+  };
+
   const currentModel = MACBOOK_MODELS.find(m => m.id === modelId)!;
+  const deskEnv  = DESK_ENVS.find(d => d.id === deskEnvId)  ?? DESK_ENVS[0];
+  const outerBg  = OUTER_BGS.find(b => b.id === outerBgId)  ?? OUTER_BGS[0];
+  const wallpaper = WALLPAPERS.find(w => w.id === wallpaperId) ?? WALLPAPERS[0];
   const isDay = dayNight === "day";
-  const lightOverlay = isDay ? "rgba(255,200,100,0.04)" : "rgba(10,10,30,0.08)";
 
   return (
     <div className="flex h-[calc(100vh-56px)]">
@@ -123,7 +173,7 @@ export function SceneEditor() {
             <div className="grid grid-cols-2 gap-1.5">
               {MACBOOK_MODELS.map(m => (
                 <button key={m.id} onClick={() => { setModelId(m.id); setColorId(m.colors[0].id); }} className={`py-2 px-2 rounded-xl border text-left transition-all text-xs ${modelId === m.id ? "bg-accent/15 border-accent/30 text-accent" : "bg-surface-elevated border-white/7 text-text-secondary hover:border-white/15"}`}>
-                  <div className="font-medium">{m.label}</div>
+                  <div className="font-medium truncate">{m.label}</div>
                   <div className="opacity-60 text-[10px]">{m.subtitle}</div>
                 </button>
               ))}
@@ -158,7 +208,7 @@ export function SceneEditor() {
             <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">Desk Environment</p>
             <div className="grid grid-cols-2 gap-1.5">
               {DESK_ENVS.map(d => (
-                <button key={d.id} onClick={() => setDeskEnv(d)} className={`py-2 px-2 rounded-xl border text-xs transition-all ${deskEnv.id === d.id ? "bg-accent/15 border-accent/30 text-accent" : "bg-surface-elevated border-white/7 text-text-secondary hover:border-white/15"}`}>
+                <button key={d.id} onClick={() => setDeskEnvId(d.id)} className={`py-2 px-2 rounded-xl border text-xs transition-all ${deskEnvId === d.id ? "bg-accent/15 border-accent/30 text-accent" : "bg-surface-elevated border-white/7 text-text-secondary hover:border-white/15"}`}>
                   {d.label}
                 </button>
               ))}
@@ -170,7 +220,7 @@ export function SceneEditor() {
             <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">Canvas Background</p>
             <div className="grid grid-cols-6 gap-1.5">
               {OUTER_BGS.map(b => (
-                <button key={b.id} onClick={() => setOuterBg(b)} className={`aspect-square rounded-lg transition-all ${outerBg.id === b.id ? "ring-2 ring-accent ring-offset-1 ring-offset-surface" : "hover:scale-105"}`} style={{ background: b.bg, border: "1px solid rgba(255,255,255,0.08)" }} />
+                <button key={b.id} onClick={() => setOuterBgId(b.id)} className={`aspect-square rounded-lg transition-all ${outerBgId === b.id ? "ring-2 ring-accent ring-offset-1 ring-offset-surface" : "hover:scale-105"}`} style={{ background: b.bg, border: "1px solid rgba(255,255,255,0.08)" }} />
               ))}
             </div>
           </section>
@@ -180,7 +230,7 @@ export function SceneEditor() {
             <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">macOS Wallpaper</p>
             <div className="grid grid-cols-6 gap-1.5">
               {WALLPAPERS.map(w => (
-                <button key={w.id} onClick={() => setWallpaper(w)} className={`aspect-square rounded-lg transition-all ${wallpaper.id === w.id ? "ring-2 ring-accent ring-offset-1 ring-offset-surface" : "hover:scale-105"}`} style={{ background: w.bg }} />
+                <button key={w.id} onClick={() => setWallpaperId(w.id)} className={`aspect-square rounded-lg transition-all ${wallpaperId === w.id ? "ring-2 ring-accent ring-offset-1 ring-offset-surface" : "hover:scale-105"}`} style={{ background: w.bg }} />
               ))}
             </div>
           </section>
@@ -189,9 +239,22 @@ export function SceneEditor() {
           <section>
             <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">App Frame</p>
             <div className="grid grid-cols-3 gap-1.5">
-              {FRAMES.filter(f => f.supportsUrl || f.id === "vscode").map(f => (
+              {FRAMES.filter(f => f.supportsUrl).map(f => (
                 <button key={f.id} onClick={() => setFrame(f.id)} className={`py-2 px-1 rounded-xl border text-xs font-medium transition-all ${frame === f.id ? "bg-accent/15 border-accent/30 text-accent" : "bg-surface-elevated border-white/7 text-text-secondary hover:border-white/15"}`}>
                   {f.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* macOS mode */}
+          <section>
+            <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">Screen Mode</p>
+            <div className="flex items-center gap-2 bg-surface-elevated rounded-xl p-1">
+              {(["dark","light"] as const).map(m => (
+                <button key={m} onClick={() => setMode(m)} className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${mode === m ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"}`}>
+                  {m === "dark" ? <Moon size={12}/> : <Sun size={12}/>}
+                  {m === "dark" ? "Dark" : "Light"}
                 </button>
               ))}
             </div>
@@ -206,27 +269,29 @@ export function SceneEditor() {
           {/* Screenshot */}
           <section>
             <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">Screenshot</p>
-            <button
-              onClick={() => fileRef.current?.click()}
-              onDragOver={e => { e.preventDefault(); setDragging(true); }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={onDrop}
-              className={`w-full border-2 border-dashed rounded-xl py-4 flex flex-col items-center gap-2 text-xs transition-all ${dragging ? "border-accent/60 bg-accent/5 text-accent" : "border-white/10 hover:border-white/20 text-text-secondary"}`}
-            >
+            <button onClick={() => fileRef.current?.click()} onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop} className={`w-full border-2 border-dashed rounded-xl py-4 flex flex-col items-center gap-2 text-xs transition-all ${dragging ? "border-accent/60 bg-accent/5 text-accent" : "border-white/10 hover:border-white/20 text-text-secondary"}`}>
               <Upload size={16}/>
               <span>Drop, paste (⌘V) or click</span>
             </button>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) readFile(f); }} />
             {screenshot && (
               <button onClick={() => setScreenshot(null)} className="mt-1.5 w-full flex items-center justify-center gap-1.5 text-xs text-text-secondary hover:text-red-400 transition-colors py-1">
-                <X size={12}/> Clear screenshot
+                <X size={12}/> Clear
               </button>
             )}
           </section>
         </div>
 
-        <div className="p-4 border-t border-white/7 mt-auto">
-          <Button variant="secondary" className="w-full text-xs gap-2"><Save size={13}/> Save Mockup</Button>
+        {/* Save */}
+        <div className="p-4 border-t border-white/7 mt-auto space-y-2">
+          <Input value={mockupTitle} onChange={e => setMockupTitle(e.target.value)} placeholder="Mockup title (optional)" className="text-xs" />
+          <Button variant={saveState === "saved" ? "secondary" : "primary"} className="w-full text-xs gap-2" onClick={handleSave} disabled={saveState === "saving"}>
+            {saveState === "saving" && <Loader2 size={12} className="animate-spin"/>}
+            {saveState === "saved"  && <Check size={12}/>}
+            {saveState === "error"  && <X size={12}/>}
+            {saveState === "idle"   && <Save size={12}/>}
+            {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved!" : saveState === "error" ? "Error — retry" : "Save Mockup"}
+          </Button>
         </div>
       </aside>
 
@@ -234,8 +299,8 @@ export function SceneEditor() {
       <main className="flex-1 flex flex-col overflow-hidden">
         <div className="h-12 border-b border-white/7 flex items-center justify-between px-4 shrink-0">
           <div className="flex items-center gap-2 text-xs text-text-secondary">
-            <Laptop size={13}/>
-            <span>Scene Mockup</span>
+            <Laptop size={13}/><span>Scene Mockup</span>
+            {mockupId && <span className="text-accent">· Editing</span>}
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-0.5 bg-surface-elevated rounded-xl border border-white/7 p-0.5">
@@ -250,56 +315,31 @@ export function SceneEditor() {
           </div>
         </div>
 
-        <div
-          className="flex-1 overflow-auto editor-canvas flex items-center justify-center p-12"
-          onDragOver={e => { e.preventDefault(); setDragging(true); }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={onDrop}
-        >
-          {/* Outer background */}
-          <div
-            ref={canvasRef}
-            className="relative overflow-hidden"
-            style={{
-              background: outerBg.bg,
-              borderRadius: 20,
-              width: "min(960px, 100%)",
-              minHeight: 540,
-              display: "flex",
-              alignItems: "flex-end",
-              justifyContent: "center",
-              padding: "60px 60px 0",
-              boxShadow: "0 40px 100px rgba(0,0,0,0.7)",
-            }}
-          >
-            {/* Ambient light overlay */}
-            {isDay
-              ? <div style={{ position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% -20%,rgba(255,200,100,0.12),transparent 60%)",pointerEvents:"none" }}/>
-              : <div style={{ position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% -20%,rgba(80,60,200,0.08),transparent 60%)",pointerEvents:"none" }}/>
-            }
+        <div className="flex-1 overflow-auto editor-canvas flex items-center justify-center p-12" onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop}>
+          <div ref={canvasRef} className="relative overflow-hidden" style={{ background: outerBg.bg, borderRadius: 20, width: "min(960px,100%)", minHeight: 520, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "52px 52px 0", boxShadow: "0 40px 100px rgba(0,0,0,0.7)" }}>
+            {/* Ambient light */}
+            <div style={{ position:"absolute",inset:0,background: isDay ? "radial-gradient(ellipse at 50% -20%,rgba(255,200,100,0.14),transparent 65%)" : "radial-gradient(ellipse at 50% -20%,rgba(80,60,200,0.1),transparent 65%)",pointerEvents:"none" }}/>
 
             {/* Desk surface */}
             {deskEnv.surface !== "transparent" && (
-              <div style={{ position:"absolute",bottom:0,left:0,right:0,height:"30%",background:deskEnv.surface,borderTop:"1px solid rgba(255,255,255,0.04)" }}/>
+              <div style={{ position:"absolute",bottom:0,left:0,right:0,height:"32%",background:deskEnv.surface,borderTop:"1px solid rgba(255,255,255,0.04)" }}/>
             )}
 
             {/* MacBook */}
-            <div style={{ position:"relative",zIndex:2,width:"78%" }}>
+            <div style={{ position:"relative",zIndex:2,width:"76%" }}>
               <MacBookShell modelId={modelId} colorId={colorId}>
-                {/* macOS desktop inside screen */}
                 <div style={{ width:"100%",height:"100%",background:wallpaper.bg,display:"flex",flexDirection:"column",position:"relative",overflow:"hidden" }}>
                   <MacOSMenuBar mode={mode}/>
-                  <div style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"12px 16px 60px",position:"relative" }}>
-                    <div style={{ width:"90%" }}>
+                  <div style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"10px 14px 56px" }}>
+                    <div style={{ width:"88%" }}>
                       {renderFrame(frame, screenshot, url, mode)}
                     </div>
                   </div>
                   <MacOSDock mode={mode}/>
                 </div>
               </MacBookShell>
-
-              {/* Reflection / shadow under laptop */}
-              <div style={{ position:"absolute",bottom:-12,left:"10%",right:"10%",height:20,background:"radial-gradient(ellipse,rgba(0,0,0,0.5) 0%,transparent 70%)",filter:"blur(8px)",zIndex:-1 }}/>
+              {/* Reflection */}
+              <div style={{ position:"absolute",bottom:-14,left:"8%",right:"8%",height:22,background:"radial-gradient(ellipse,rgba(0,0,0,0.55) 0%,transparent 70%)",filter:"blur(8px)",zIndex:-1 }}/>
             </div>
           </div>
         </div>
