@@ -15,18 +15,34 @@ async function getMockup(slug: string) {
       .leftJoin(users, eq(mockups.userId, users.id))
       .where(eq(mockups.shareSlug, slug));
     return row ?? null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await getMockup(slug);
   if (!data) return { title: "Not found — mockX" };
+
+  const { mockup, userName } = data;
+  const title = mockup.title ?? "Shared mockup";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const ogUrl  = `${appUrl}/api/og?title=${encodeURIComponent(title)}&type=${mockup.type}&user=${encodeURIComponent(userName ?? "")}`;
+
   return {
-    title: `${data.mockup.title ?? "Shared mockup"} — mockX`,
-    description: `A ${data.mockup.type} mockup shared via mockX`,
+    title: `${title} — mockX`,
+    description: `A ${mockup.type} mockup shared via mockX`,
+    openGraph: {
+      title: `${title} — mockX`,
+      description: `A ${mockup.type} mockup shared via mockX`,
+      images: [{ url: ogUrl, width: 1200, height: 630, alt: title }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} — mockX`,
+      description: `A ${mockup.type} mockup shared via mockX`,
+      images: [ogUrl],
+    },
   };
 }
 
@@ -36,27 +52,27 @@ export default async function SharePage({ params }: Props) {
   if (!data || !data.mockup.isPublic) notFound();
 
   const { mockup, userName } = data;
-  const config = mockup.config as Record<string, unknown>;
+  const cfg = mockup.config as Record<string, unknown>;
 
-  // For screen mockups, extract wallpaper for preview bg
   const WALLPAPERS: Record<string, string> = {
-    "sonoma-dark":  "linear-gradient(135deg,#1a1a2e,#16213e,#0f3460,#533483)",
-    "sequoia":      "linear-gradient(160deg,#0d1b2a,#1b4332,#74c69d)",
-    "slate":        "linear-gradient(135deg,#0f0c29,#302b63,#24243e)",
-    "ventura":      "linear-gradient(145deg,#667eea,#764ba2,#f093fb)",
-    "dark-solid":   "#111113",
-    "light-clouds": "linear-gradient(145deg,#e8eaf6,#c5cae9,#e3f2fd)",
-    "sunrise":      "linear-gradient(135deg,#f9a825,#f57f17,#e64a19)",
-    "ocean":        "linear-gradient(180deg,#0077b6,#023e8a,#03045e)",
-    "sonoma":       "linear-gradient(135deg,#1a1a2e,#16213e,#0f3460,#533483)",
-    "dark":         "#111113",
+    "sonoma-dark": "linear-gradient(135deg,#1a1a2e,#533483)",
+    "sequoia":     "linear-gradient(160deg,#0d1b2a,#74c69d)",
+    "slate":       "linear-gradient(135deg,#0f0c29,#24243e)",
+    "ventura":     "linear-gradient(145deg,#667eea,#f093fb)",
+    "dark-solid":  "#111113",
+    "dark":        "#111113",
+  };
+  const OUTER: Record<string,string> = {
+    "dark-1": "#0a0c10", "dark-2": "linear-gradient(135deg,#0f0c29,#302b63)",
+    "purple": "linear-gradient(135deg,#1a0533,#3b0764)",
   };
 
-  const previewBg = WALLPAPERS[config.wallpaperId as string] ?? "#111113";
+  const previewBg = mockup.type === "scene"
+    ? (OUTER[(cfg?.outerBgId as string) ?? ""] ?? WALLPAPERS[(cfg?.wallpaperId as string) ?? ""] ?? "#111113")
+    : (WALLPAPERS[(cfg?.wallpaperId as string) ?? ""] ?? "#111113");
 
   return (
     <div className="min-h-screen bg-bg flex flex-col">
-      {/* Nav */}
       <header className="h-14 border-b border-white/7 flex items-center justify-between px-6" style={{ background: "rgba(10,12,16,0.9)", backdropFilter: "blur(12px)" }}>
         <Link href="/" className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center">
@@ -67,43 +83,30 @@ export default async function SharePage({ params }: Props) {
           </div>
           <span className="font-syne font-bold text-sm text-text-primary">mock<span className="text-accent">X</span></span>
         </Link>
-        <Link href="/signup" className="text-xs text-text-secondary hover:text-text-primary transition-colors">
+        <Link href="/signup" className="text-xs text-accent hover:text-accent-hover transition-colors font-medium">
           Create your own →
         </Link>
       </header>
 
-      {/* Content */}
       <main className="flex-1 flex flex-col items-center justify-center p-8 gap-6">
-        {/* Meta */}
         <div className="text-center">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-accent/25 bg-accent/8 text-accent text-xs font-medium mb-4 capitalize">
+            {mockup.type} Mockup
+          </div>
           <h1 className="font-syne font-bold text-2xl text-text-primary mb-1">
             {mockup.title ?? "Untitled mockup"}
           </h1>
-          <p className="text-sm text-text-secondary">
-            Shared by {userName ?? "Anonymous"} · {mockup.type === "screen" ? "Screen Mockup" : "Scene Mockup"}
-          </p>
+          <p className="text-sm text-text-secondary">Shared by {userName ?? "Anonymous"}</p>
         </div>
 
         {/* Preview */}
-        <div
-          className="rounded-2xl overflow-hidden w-full max-w-3xl"
-          style={{
-            background: previewBg,
-            aspectRatio: "16/10",
-            boxShadow: "0 32px 80px rgba(0,0,0,0.7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {mockup.thumbnailUrl ? (
-            <img src={mockup.thumbnailUrl} alt="Mockup preview" className="w-full h-full object-cover" />
-          ) : (
-            <div className="text-text-secondary text-sm opacity-50">Preview not available</div>
-          )}
+        <div className="rounded-2xl overflow-hidden w-full max-w-3xl" style={{ background: previewBg, aspectRatio: "16/10", boxShadow: "0 32px 80px rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {mockup.thumbnailUrl
+            ? <img src={mockup.thumbnailUrl} alt="Mockup preview" className="w-full h-full object-cover"/>
+            : <div className="text-text-secondary text-sm opacity-30">Preview not available</div>
+          }
         </div>
 
-        {/* CTA */}
         <div className="flex items-center gap-3">
           <Link href="/signup">
             <button className="px-5 py-2.5 rounded-xl bg-accent text-white text-sm font-medium hover:bg-accent-hover transition-colors shadow-lg shadow-accent/20">

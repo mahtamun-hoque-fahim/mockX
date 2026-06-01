@@ -12,18 +12,20 @@ interface Props { searchParams: Promise<{ id?: string }> }
 
 export default async function ScenePage({ searchParams }: Props) {
   const { id } = await searchParams;
-
-  if (!id) return <SceneEditor />;
-
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return <SceneEditor />;
+  const role = (session?.user as { role?: string } | undefined)?.role ?? "user";
 
-  try {
-    const [row] = await db.select().from(mockups).where(and(eq(mockups.id, id), eq(mockups.userId, session.user.id)));
-    if (row && row.type === "scene") {
-      return <SceneEditor mockupId={id} initialConfig={row.config as SceneConfig} />;
-    }
-  } catch {}
+  if (!id) return <SceneEditor userRole={role} />;
 
-  return <SceneEditor />;
+  if (session) {
+    try {
+      const [row] = await db.select().from(mockups)
+        .where(and(eq(mockups.id, id), eq(mockups.userId, session.user.id)));
+      if (row?.type === "scene") {
+        return <SceneEditor mockupId={id} initialConfig={row.config as SceneConfig} userRole={role} />;
+      }
+    } catch {}
+  }
+
+  return <SceneEditor userRole={role} />;
 }

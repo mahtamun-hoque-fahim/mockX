@@ -12,18 +12,20 @@ interface Props { searchParams: Promise<{ id?: string }> }
 
 export default async function ScreenPage({ searchParams }: Props) {
   const { id } = await searchParams;
-
-  if (!id) return <ScreenEditor />;
-
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return <ScreenEditor />;
+  const role = (session?.user as { role?: string } | undefined)?.role ?? "user";
 
-  try {
-    const [row] = await db.select().from(mockups).where(and(eq(mockups.id, id), eq(mockups.userId, session.user.id)));
-    if (row && row.type === "screen") {
-      return <ScreenEditor mockupId={id} initialConfig={row.config as ScreenConfig} />;
-    }
-  } catch {}
+  if (!id) return <ScreenEditor userRole={role} />;
 
-  return <ScreenEditor />;
+  if (session) {
+    try {
+      const [row] = await db.select().from(mockups)
+        .where(and(eq(mockups.id, id), eq(mockups.userId, session.user.id)));
+      if (row?.type === "screen") {
+        return <ScreenEditor mockupId={id} initialConfig={row.config as ScreenConfig} userRole={role} />;
+      }
+    } catch {}
+  }
+
+  return <ScreenEditor userRole={role} />;
 }

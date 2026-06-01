@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mockx",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": ".open-next/assets",
+
+  // Environment variables for CF Pages (add via CF dashboard, not here)
+  // Required: DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL,
+  //           RESEND_API_KEY, NEXT_PUBLIC_APP_URL
+
+  "observability": {
+    "enabled": true
+  }
+}
