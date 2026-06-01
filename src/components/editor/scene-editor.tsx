@@ -6,6 +6,9 @@ import { SafariFrame }  from "@/components/frames/safari";
 import { ChromeFrame }  from "@/components/frames/chrome";
 import { ArcFrame }     from "@/components/frames/arc";
 import { FirefoxFrame } from "@/components/frames/firefox";
+import { FigmaFrame }    from "@/components/frames/figma";
+import { NotionFrame }   from "@/components/frames/notion";
+import { XcodeFrame }    from "@/components/frames/xcode";
 import { FRAMES, type FrameId } from "@/components/frames";
 import { MacBookAir13 } from "@/components/macbook/macbook-air-13";
 import { MacBookAir15 } from "@/components/macbook/macbook-air-15";
@@ -50,6 +53,9 @@ function renderFrame(id: FrameId, screenshot: string|null, url: string, mode: "d
   if (id === "chrome")  return <ChromeFrame  {...p} />;
   if (id === "arc")     return <ArcFrame     {...p} />;
   if (id === "firefox") return <FirefoxFrame {...p} />;
+  if (id === "figma")   return <FigmaFrame   screenshot={p.screenshot} mode={p.mode} />;
+  if (id === "notion")  return <NotionFrame  screenshot={p.screenshot} mode={p.mode} />;
+  if (id === "xcode")   return <XcodeFrame   screenshot={p.screenshot} mode={p.mode} />;
   return                       <SafariFrame  {...p} />;
 }
 
@@ -154,11 +160,17 @@ export function SceneEditor({ mockupId, initialConfig, userRole = "user" }: Scen
     setSaveState("saving");
     try {
       const config: SceneConfig = { modelId, colorId, deskEnvId, outerBgId, dayNight, wallpaperId, frame, mode, url, screenshot };
+      // Generate thumbnail from canvas
+      let thumbnailUrl: string | null = null;
+      if (canvasRef.current) {
+        const { generateThumbnail } = await import("@/lib/thumbnail");
+        thumbnailUrl = await generateThumbnail(canvasRef.current);
+      }
       const method = mockupId ? "PATCH" : "POST";
       const apiUrl = mockupId ? `/api/mockups/${mockupId}` : "/api/mockups";
       const res = await fetch(apiUrl, {
         method, headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "scene", title: mockupTitle || null, config }),
+        body: JSON.stringify({ type: "scene", title: mockupTitle || null, config, thumbnailUrl }),
       });
       if (res.status === 403) { setSaveState("idle"); setUpgradeTrigger("Unlimited saves"); setUpgradeOpen(true); return; }
       if (!res.ok) throw new Error();

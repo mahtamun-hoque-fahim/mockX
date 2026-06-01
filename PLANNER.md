@@ -187,14 +187,25 @@ npm run build:cf          # builds via @opennextjs/cloudflare
 - [x] Cloudflare Pages config (wrangler.jsonc, open-next.config.ts)
 - [x] @opennextjs/cloudflare + wrangler devDependencies
 
-### Phase 5 (next)
-- [ ] Lemon Squeezy payment integration (Pro subscription)
-- [ ] Custom background image upload (Cloudinary) — Pro feature
-- [ ] Figma / Notion / Xcode app frames
-- [ ] Umami analytics embed
-- [ ] Email on signup (welcome email via Resend)
-- [ ] Admin: change user role from UI
+### Phase 5 ✓
+- [x] Lemon Squeezy billing (checkout, portal, webhook handler — full subscribe/cancel flow)
+- [x] Subscriptions table in DB (lsSubscriptionId, lsCustomerId, status, currentPeriodEnd)
+- [x] Settings billing section (plan badge, manage billing / upgrade CTA)
+- [x] Upgrade success banner on return from Lemon Squeezy (?upgraded=1)
+- [x] Pro upgrade confirmation email (Resend)
+- [x] Welcome email on signup (Better Auth databaseHooks)
+- [x] Figma frame (layers panel, canvas, properties panel)
+- [x] Notion frame (sidebar, page list, content area)
+- [x] Xcode frame (navigator, editor, status bar)
+- [x] 10 total app frames (up from 7)
+- [x] Thumbnail generation on save (html2canvas 0.13× JPEG stored as thumbnailUrl)
+- [x] Admin role change UI (inline select dropdown, PATCH /api/admin/users/[id])
+- [x] Umami analytics (optional script in layout, guarded by NEXT_PUBLIC_UMAMI_ID)
+- [x] .env.example with all Phase 5 vars (LS keys, Umami, Cloudinary)
+
+### Phase 6 (future)
+- [ ] Custom background image upload (Cloudinary, Pro-gated)
+- [ ] Mockups library pagination
 - [ ] Admin: bulk delete mockups
-- [ ] Thumbnail generation on save (html2canvas → base64 stored)
-- [ ] Mockups library pagination (currently limited to 50)
 - [ ] PWA manifest + icons
+- [ ] Linear / Slack / Discord frames

@@ -9,6 +9,9 @@ import { FirefoxFrame }  from "@/components/frames/firefox";
 import { VSCodeFrame }   from "@/components/frames/vscode";
 import { FinderFrame }   from "@/components/frames/finder";
 import { TerminalFrame } from "@/components/frames/terminal";
+import { FigmaFrame }    from "@/components/frames/figma";
+import { NotionFrame }   from "@/components/frames/notion";
+import { XcodeFrame }    from "@/components/frames/xcode";
 import { FRAMES, type FrameId } from "@/components/frames";
 import { UpgradeModal }  from "@/components/pro/upgrade-modal";
 import { Button } from "@/components/ui/button";
@@ -68,6 +71,9 @@ function renderFrame(id: FrameId, win: ScreenWindow, mode: "dark"|"light") {
     case "vscode":   return <VSCodeFrame   screenshot={p.screenshot} title={p.title} mode={p.mode} />;
     case "finder":   return <FinderFrame   screenshot={p.screenshot} title={p.title} mode={p.mode} />;
     case "terminal": return <TerminalFrame screenshot={p.screenshot} title={p.title} mode={p.mode} />;
+    case "figma":    return <FigmaFrame    screenshot={p.screenshot} title={p.title} mode={p.mode} />;
+    case "notion":   return <NotionFrame   screenshot={p.screenshot} title={p.title} mode={p.mode} />;
+    case "xcode":    return <XcodeFrame    screenshot={p.screenshot} title={p.title} mode={p.mode} />;
     default:         return <SafariFrame   {...p} />;
   }
 }
@@ -185,12 +191,18 @@ export function ScreenEditor({ mockupId, initialConfig, userRole = "user" }: Scr
     setSaveState("saving");
     try {
       const config: ScreenConfig = { frame, wallpaperId: wallpaper.id, mode, showDock, windows };
+      // Generate thumbnail from canvas
+      let thumbnailUrl: string | null = null;
+      if (canvasRef.current) {
+        const { generateThumbnail } = await import("@/lib/thumbnail");
+        thumbnailUrl = await generateThumbnail(canvasRef.current);
+      }
       const method = mockupId ? "PATCH" : "POST";
       const url    = mockupId ? `/api/mockups/${mockupId}` : "/api/mockups";
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "screen", title: mockupTitle || null, config }),
+        body: JSON.stringify({ type: "screen", title: mockupTitle || null, config, thumbnailUrl }),
       });
       if (res.status === 403) { setSaveState("idle"); setUpgradeTrigger("Unlimited saves"); setUpgradeOpen(true); return; }
       if (!res.ok) throw new Error();

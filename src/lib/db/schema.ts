@@ -128,3 +128,28 @@ export type Mockup = typeof mockups.$inferSelect;
 export type NewMockup = typeof mockups.$inferInsert;
 export type Preset = typeof presets.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
+
+// Subscription status enum
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "active",
+  "cancelled",
+  "expired",
+  "paused",
+  "past_due",
+]);
+
+// Lemon Squeezy subscriptions
+export const subscriptions = pgTable("subscriptions", {
+  id:                 text("id").primaryKey(),
+  userId:             text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  lsSubscriptionId:   text("ls_subscription_id").notNull().unique(),
+  lsCustomerId:       text("ls_customer_id").notNull(),
+  lsVariantId:        text("ls_variant_id"),
+  status:             subscriptionStatusEnum("status").notNull().default("active"),
+  currentPeriodEnd:   timestamp("current_period_end"),
+  cancelledAt:        timestamp("cancelled_at"),
+  createdAt:          timestamp("created_at").notNull().defaultNow(),
+  updatedAt:          timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
