@@ -9,6 +9,8 @@ import { FirefoxFrame } from "@/components/frames/firefox";
 import { FigmaFrame }    from "@/components/frames/figma";
 import { NotionFrame }   from "@/components/frames/notion";
 import { XcodeFrame }    from "@/components/frames/xcode";
+import { LinearFrame }   from "@/components/frames/linear";
+import { SlackFrame }    from "@/components/frames/slack";
 import { FRAMES, type FrameId } from "@/components/frames";
 import { MacBookAir13 } from "@/components/macbook/macbook-air-13";
 import { MacBookAir15 } from "@/components/macbook/macbook-air-15";
@@ -17,6 +19,7 @@ import { MacBookPro16 } from "@/components/macbook/macbook-pro-16";
 import { MACBOOK_MODELS } from "@/components/macbook";
 import { UpgradeModal }  from "@/components/pro/upgrade-modal";
 import { Button } from "@/components/ui/button";
+import { CustomUploadButton } from "@/components/editor/custom-upload-button";
 import { Input }  from "@/components/ui/input";
 import { Sun, Moon, Download, Save, Upload, X, Laptop, Check, Loader2, Zap } from "lucide-react";
 
@@ -56,6 +59,8 @@ function renderFrame(id: FrameId, screenshot: string|null, url: string, mode: "d
   if (id === "figma")   return <FigmaFrame   screenshot={p.screenshot} mode={p.mode} />;
   if (id === "notion")  return <NotionFrame  screenshot={p.screenshot} mode={p.mode} />;
   if (id === "xcode")   return <XcodeFrame   screenshot={p.screenshot} mode={p.mode} />;
+  if (id === "linear")  return <LinearFrame  screenshot={p.screenshot} mode={p.mode} />;
+  if (id === "slack")   return <SlackFrame   screenshot={p.screenshot} mode={p.mode} />;
   return                       <SafariFrame  {...p} />;
 }
 
@@ -89,6 +94,7 @@ export function SceneEditor({ mockupId, initialConfig, userRole = "user" }: Scen
   const [mode,        setMode]        = useState<"dark"|"light">(initialConfig?.mode ?? "dark");
   const [url,         setUrl]         = useState(initialConfig?.url         ?? "https://yoursite.com");
   const [screenshot,  setScreenshot]  = useState<string|null>(initialConfig?.screenshot ?? null);
+  const [customBg,    setCustomBg]    = useState<string|null>(null);
   const [dragging,    setDragging]    = useState(false);
   const [exporting,   setExporting]   = useState(false);
   const [saveState,   setSaveState]   = useState<"idle"|"saving"|"saved"|"error">("idle");
@@ -329,7 +335,7 @@ export function SceneEditor({ mockupId, initialConfig, userRole = "user" }: Scen
           </div>
 
           <div className="flex-1 overflow-auto editor-canvas flex items-center justify-center p-12" onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop}>
-            <div ref={canvasRef} className="relative overflow-hidden" style={{ background: outerBg.bg, borderRadius: 20, width: "min(960px,100%)", minHeight: 520, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "52px 52px 0", boxShadow: "0 40px 100px rgba(0,0,0,0.7)" }}>
+            <div ref={canvasRef} className="relative overflow-hidden" style={{ background: customBg ? `url(${customBg}) center/cover no-repeat` : outerBg.bg, borderRadius: 20, width: "min(960px,100%)", minHeight: 520, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "52px 52px 0", boxShadow: "0 40px 100px rgba(0,0,0,0.7)" }}>
               <div style={{ position:"absolute",inset:0,background:isDay?"radial-gradient(ellipse at 50% -20%,rgba(255,200,100,0.14),transparent 65%)":"radial-gradient(ellipse at 50% -20%,rgba(80,60,200,0.1),transparent 65%)",pointerEvents:"none" }}/>
               {deskEnv.surface !== "transparent" && <div style={{ position:"absolute",bottom:0,left:0,right:0,height:"32%",background:deskEnv.surface,borderTop:"1px solid rgba(255,255,255,0.04)" }}/>}
               <div style={{ position:"relative",zIndex:2,width:"76%" }}>

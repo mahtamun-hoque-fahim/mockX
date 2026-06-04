@@ -203,9 +203,30 @@ npm run build:cf          # builds via @opennextjs/cloudflare
 - [x] Umami analytics (optional script in layout, guarded by NEXT_PUBLIC_UMAMI_ID)
 - [x] .env.example with all Phase 5 vars (LS keys, Umami, Cloudinary)
 
-### Phase 6 (future)
-- [ ] Custom background image upload (Cloudinary, Pro-gated)
-- [ ] Mockups library pagination
+### Phase 6 ✓
+- [x] PWA manifest + icon (next/og-generated, maskable, 192+512)
+- [x] Custom 404 page (animated MacBook frame graphic)
+- [x] Global error.tsx + app-level error.tsx (error boundaries)
+- [x] Cloudinary upload API (/api/upload, Pro-gated, 8MB limit, JPEG/PNG/WebP)
+- [x] Custom wallpaper upload in Screen editor (Pro badge, upgrade modal)
+- [x] Custom background upload in Scene editor (Pro badge, upgrade modal)
+- [x] CustomUploadButton component (reusable, Pro-gate aware)
+- [x] Linear frame (sidebar, issues list, toolbar with filter/group)
+- [x] Slack frame (aubergine sidebar, channels, DMs, message input)
+- [x] 12 total app frames (Safari Chrome Arc Firefox VSCode Finder Terminal Figma Notion Xcode Linear Slack)
+- [x] Cursor-based pagination in GET /api/mockups (?cursor= ISO string)
+- [x] MockupsGrid with Load More button (fetches next page on click)
+- [x] Mockups page updated for paginated API shape
+- [x] Rate limiting in feedback API (Upstash Redis with no-op fallback)
+- [x] src/lib/ratelimit.ts — graceful degradation if Upstash not configured
+- [x] Frames marquee: 12 frames, double-row, second row reverse direction
+- [x] App layout: sticky header, Pro badge, avatar links to settings
+- [x] .env.example: Upstash Redis vars added
+
+### Phase 7 (future)
 - [ ] Admin: bulk delete mockups
-- [ ] PWA manifest + icons
-- [ ] Linear / Slack / Discord frames
+- [ ] Discord frame
+- [ ] Email verification flow (resend verification link)
+- [ ] Mockup duplication (clone button in grid)
+- [ ] Keyboard shortcuts in editor (⌘S save, ⌘E export)
+- [ ] Dark/light mode for mockX UI itself (currently dark-only)

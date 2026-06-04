@@ -8,11 +8,14 @@ export { TerminalFrame } from "./terminal";
 export { FigmaFrame }    from "./figma";
 export { NotionFrame }   from "./notion";
 export { XcodeFrame }    from "./xcode";
+export { LinearFrame }   from "./linear";
+export { SlackFrame }    from "./slack";
 
 export type FrameId =
-  | "safari" | "chrome" | "arc" | "firefox"
+  | "safari" | "chrome" | "arc"    | "firefox"
   | "vscode" | "finder" | "terminal"
-  | "figma"  | "notion" | "xcode";
+  | "figma"  | "notion" | "xcode"
+  | "linear" | "slack";
 
 export const FRAMES: { id: FrameId; label: string; supportsUrl: boolean }[] = [
   { id: "safari",   label: "Safari",   supportsUrl: true  },
@@ -25,4 +28,6 @@ export const FRAMES: { id: FrameId; label: string; supportsUrl: boolean }[] = [
   { id: "figma",    label: "Figma",    supportsUrl: false },
   { id: "notion",   label: "Notion",   supportsUrl: false },
   { id: "xcode",    label: "Xcode",    supportsUrl: false },
+  { id: "linear",   label: "Linear",   supportsUrl: false },
+  { id: "slack",    label: "Slack",    supportsUrl: false },
 ];

@@ -12,9 +12,12 @@ import { TerminalFrame } from "@/components/frames/terminal";
 import { FigmaFrame }    from "@/components/frames/figma";
 import { NotionFrame }   from "@/components/frames/notion";
 import { XcodeFrame }    from "@/components/frames/xcode";
+import { LinearFrame }   from "@/components/frames/linear";
+import { SlackFrame }    from "@/components/frames/slack";
 import { FRAMES, type FrameId } from "@/components/frames";
 import { UpgradeModal }  from "@/components/pro/upgrade-modal";
 import { Button } from "@/components/ui/button";
+import { CustomUploadButton } from "@/components/editor/custom-upload-button";
 import { Input }  from "@/components/ui/input";
 import {
   Monitor, Sun, Moon, Download, Save,
@@ -74,6 +77,8 @@ function renderFrame(id: FrameId, win: ScreenWindow, mode: "dark"|"light") {
     case "figma":    return <FigmaFrame    screenshot={p.screenshot} title={p.title} mode={p.mode} />;
     case "notion":   return <NotionFrame   screenshot={p.screenshot} title={p.title} mode={p.mode} />;
     case "xcode":    return <XcodeFrame    screenshot={p.screenshot} title={p.title} mode={p.mode} />;
+    case "linear":   return <LinearFrame   screenshot={p.screenshot} title={p.title} mode={p.mode} />;
+    case "slack":    return <SlackFrame    screenshot={p.screenshot} title={p.title} mode={p.mode} />;
     default:         return <SafariFrame   {...p} />;
   }
 }
@@ -92,6 +97,7 @@ export function ScreenEditor({ mockupId, initialConfig, userRole = "user" }: Scr
   const [showDock, setShowDock]   = useState(initialConfig?.showDock ?? true);
   const [windows, setWindows]     = useState<ScreenWindow[]>(initialConfig?.windows ?? [newWindow()]);
   const [activeWin, setActiveWin] = useState(0);
+  const [customWallpaper, setCustomWallpaper] = useState<string|null>(null);
   const [dragging, setDragging]   = useState(false);
   const [exporting, setExporting] = useState(false);
   const [saveState, setSaveState] = useState<"idle"|"saving"|"saved"|"error">("idle");
@@ -248,6 +254,14 @@ export function ScreenEditor({ mockupId, initialConfig, userRole = "user" }: Scr
                   <button key={w.id} onClick={() => setWallpaper(w)} className={`aspect-square rounded-lg transition-all ${wallpaper.id === w.id ? "ring-2 ring-accent ring-offset-1 ring-offset-surface" : "hover:scale-105"}`} style={{ background: w.bg }} />
                 ))}
               </div>
+              {/* Custom wallpaper upload */}
+              <CustomUploadButton
+                userRole={userRole}
+                label={customWallpaper ? "Custom wallpaper set" : "Upload custom wallpaper"}
+                hasValue={!!customWallpaper}
+                onUpload={url => setCustomWallpaper(url)}
+                onClear={() => setCustomWallpaper(null)}
+              />
             </section>
 
             {/* App frame */}
