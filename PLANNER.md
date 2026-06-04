@@ -223,10 +223,25 @@ npm run build:cf          # builds via @opennextjs/cloudflare
 - [x] App layout: sticky header, Pro badge, avatar links to settings
 - [x] .env.example: Upstash Redis vars added
 
-### Phase 7 (future)
-- [ ] Admin: bulk delete mockups
+### Phase 7 ✓ — Polish & Production-Ready
+- [x] next.config.ts: removed risky require() call, simplified
+- [x] open-next.config.ts: fixed wrapper to cloudflare-edge
+- [x] db/index.ts: helpful error on missing DATABASE_URL + singleton
+- [x] Root layout: favicon + apple-touch-icon + theme-color + metadataBase
+- [x] Pricing page: Pro CTA now links to /api/billing/checkout (real checkout)
+- [x] ActiveNav component (client, usePathname, accent highlight on active route)
+- [x] App layout updated: uses ActiveNav, no duplicate server/client split
+- [x] src/app/(app)/loading.tsx: animated logo pulse loading state
+- [x] src/app/(auth)/loading.tsx: skeleton loading for auth pages
+- [x] Hero section: inline macOS desktop preview illustration (pure CSS/SVG)
+  - Safari window with fake page content, menubar, dock
+  - Floating feature callout labels (12 app frames, Dark mode, Export 3×, Cmd+V)
+
+### Phase 8 (future)
 - [ ] Discord frame
-- [ ] Email verification flow (resend verification link)
-- [ ] Mockup duplication (clone button in grid)
-- [ ] Keyboard shortcuts in editor (⌘S save, ⌘E export)
-- [ ] Dark/light mode for mockX UI itself (currently dark-only)
+- [ ] Admin: bulk delete mockups
+- [ ] Email verification flow
+- [ ] Mockup duplication (clone button)
+- [ ] Keyboard shortcuts (⌘S save, ⌘E export)
+- [ ] Mobile nav (bottom tab bar for small screens)
+- [ ] Dark/light mode toggle for the mockX UI shell

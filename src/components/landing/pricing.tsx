@@ -34,8 +34,8 @@ const PLANS = [
       "Public share links",
       "Priority support",
     ],
-    cta: "Start Pro — $9/mo",
-    href: "/signup?plan=pro",
+    cta: "Upgrade to Pro — $9/mo",
+    href: "/api/billing/checkout",
     highlight: true,
   },
 ];
