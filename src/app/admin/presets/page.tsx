@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { presets } from "@/lib/db/schema";
 import type { Preset } from "@/lib/db/schema";

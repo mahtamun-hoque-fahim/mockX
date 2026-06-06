@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { feedback, users } from "@/lib/db/schema";
 import type { Feedback } from "@/lib/db/schema";

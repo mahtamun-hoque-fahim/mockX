@@ -17,4 +17,18 @@ export function getDb() {
   return _db;
 }
 
-export const db = getDb();
+type DbType = ReturnType<typeof getDb>;
+
+// Lazy proxy: evaluates only on first property access, not at import time.
+// Prevents Next.js static page-data collection from throwing during build.
+export const db: DbType = new Proxy(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  {} as any,
+  {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    get(_target: any, prop: any) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (getDb() as any)[prop];
+    },
+  }
+);
