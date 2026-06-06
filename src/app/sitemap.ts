@@ -15,23 +15,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   let shareRoutes: MetadataRoute.Sitemap = [];
-  try {
-    const rows: SlugRow[] = await db
-      .select({ shareSlug: mockups.shareSlug, updatedAt: mockups.updatedAt })
-      .from(mockups)
-      .where(eq(mockups.isPublic, true));
+  if (process.env.DATABASE_URL) {
+    try {
+      const rows: SlugRow[] = await db
+        .select({ shareSlug: mockups.shareSlug, updatedAt: mockups.updatedAt })
+        .from(mockups)
+        .where(eq(mockups.isPublic, true));
 
-    shareRoutes = rows
-      .filter((r: SlugRow): r is { shareSlug: string; updatedAt: Date } =>
-        r.shareSlug !== null && r.shareSlug.length > 0
-      )
-      .map((r: { shareSlug: string; updatedAt: Date }) => ({
-        url: `${appUrl}/share/${r.shareSlug}`,
-        lastModified: r.updatedAt,
-        changeFrequency: "monthly" as const,
-        priority: 0.4,
-      }));
-  } catch { /* DB may not be connected at build time */ }
+      shareRoutes = rows
+        .filter((r: SlugRow): r is { shareSlug: string; updatedAt: Date } =>
+          r.shareSlug !== null && r.shareSlug.length > 0
+        )
+        .map((r: { shareSlug: string; updatedAt: Date }) => ({
+          url: `${appUrl}/share/${r.shareSlug}`,
+          lastModified: r.updatedAt,
+          changeFrequency: "monthly" as const,
+          priority: 0.4,
+        }));
+    } catch { /* DB unavailable */ }
+  }
 
   return [...staticRoutes, ...shareRoutes];
 }
