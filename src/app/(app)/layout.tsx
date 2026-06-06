@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { ActiveNav } from "@/components/layout/active-nav";
+import { MobileNav } from "@/components/layout/mobile-nav";
 import { LayoutDashboard, Monitor, Laptop, Images, Settings } from "lucide-react";
 
 const NAV = [
@@ -61,7 +62,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      <div className="flex-1 overflow-hidden">{children}</div>
+      <div className="flex-1 overflow-hidden pb-16 md:pb-0">{children}</div>
+      <MobileNav />
     </div>
   );
 }

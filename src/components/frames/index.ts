@@ -10,12 +10,13 @@ export { NotionFrame }   from "./notion";
 export { XcodeFrame }    from "./xcode";
 export { LinearFrame }   from "./linear";
 export { SlackFrame }    from "./slack";
+export { DiscordFrame }  from "./discord";
 
 export type FrameId =
   | "safari" | "chrome" | "arc"    | "firefox"
   | "vscode" | "finder" | "terminal"
   | "figma"  | "notion" | "xcode"
-  | "linear" | "slack";
+  | "linear" | "slack"  | "discord";
 
 export const FRAMES: { id: FrameId; label: string; supportsUrl: boolean }[] = [
   { id: "safari",   label: "Safari",   supportsUrl: true  },
@@ -30,4 +31,5 @@ export const FRAMES: { id: FrameId; label: string; supportsUrl: boolean }[] = [
   { id: "xcode",    label: "Xcode",    supportsUrl: false },
   { id: "linear",   label: "Linear",   supportsUrl: false },
   { id: "slack",    label: "Slack",    supportsUrl: false },
+  { id: "discord",  label: "Discord",  supportsUrl: false },
 ];

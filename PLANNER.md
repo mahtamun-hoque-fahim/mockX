@@ -237,11 +237,14 @@ npm run build:cf          # builds via @opennextjs/cloudflare
   - Safari window with fake page content, menubar, dock
   - Floating feature callout labels (12 app frames, Dark mode, Export 3×, Cmd+V)
 
-### Phase 8 (future)
-- [ ] Discord frame
-- [ ] Admin: bulk delete mockups
-- [ ] Email verification flow
-- [ ] Mockup duplication (clone button)
-- [ ] Keyboard shortcuts (⌘S save, ⌘E export)
-- [ ] Mobile nav (bottom tab bar for small screens)
-- [ ] Dark/light mode toggle for the mockX UI shell
+### Phase 8 (complete)
+- [x] Discord frame — full chat UI (server strip, channel sidebar, message area, user bar)
+- [x] Wire Discord in both editors (screen + scene renderFrame switch)
+- [x] Show all 13 frames in scene editor (removed supportsUrl filter); grid-cols-4
+- [x] Screen editor frame grid → grid-cols-4
+- [x] Scene editor: conditional URL input (only when currentFrame.supportsUrl === true)
+- [x] Keyboard shortcuts ⌘S / ⌘E in both editors; hint badges in top bar
+- [x] Mockup duplication — Copy button per card, POST /api/mockups, prepend to list
+- [x] Mobile bottom nav (MobileNav component, 5 items, active state, pb-16 content padding)
+- [x] Admin bulk delete mockups — checkboxes, select-all, parallel DELETE, UI update
+- [x] Landing frames marquee — Discord entry added; heading updated to "13 app frames"

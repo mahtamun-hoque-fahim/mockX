@@ -37,6 +37,7 @@ export function MockupsGrid({ initialMockups, initialNextCursor }: MockupsGridPr
   const [deleting,   setDeleting]   = useState<string | null>(null);
   const [sharing,    setSharing]    = useState<string | null>(null);
   const [copiedId,   setCopiedId]   = useState<string | null>(null);
+  const [duplicating,setDuplicating]= useState<string | null>(null);
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || loadingMore) return;
@@ -51,8 +52,28 @@ export function MockupsGrid({ initialMockups, initialNextCursor }: MockupsGridPr
     }
   }, [nextCursor, loadingMore]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this mockup?")) return;
+  const handleDuplicate = async (mockup: Mockup) => {
+    setDuplicating(mockup.id);
+    try {
+      const res  = await fetch("/api/mockups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type:         mockup.type,
+          title:        mockup.title ? `${mockup.title} (copy)` : "Untitled (copy)",
+          config:       mockup.config,
+          thumbnailUrl: mockup.thumbnailUrl,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const created = await res.json() as Mockup;
+      setItems(prev => [created, ...prev]);
+    } finally {
+      setDuplicating(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {    if (!confirm("Delete this mockup?")) return;
     setDeleting(id);
     try {
       await fetch(`/api/mockups/${id}`, { method: "DELETE" });
@@ -137,6 +158,10 @@ export function MockupsGrid({ initialMockups, initialNextCursor }: MockupsGridPr
                 <Link href={`/app/${mockup.type}?id=${mockup.id}`} className="flex-1">
                   <Button variant="secondary" size="sm" className="w-full text-xs gap-1.5"><Pencil size={11}/> Edit</Button>
                 </Link>
+                {/* Duplicate */}
+                <button onClick={() => handleDuplicate(mockup)} disabled={duplicating === mockup.id} title="Duplicate" className="w-8 h-8 rounded-xl bg-surface-elevated border border-white/8 flex items-center justify-center text-text-secondary hover:text-text-primary hover:border-white/16 transition-all disabled:opacity-40">
+                  {duplicating === mockup.id ? <Loader2 size={12} className="animate-spin"/> : <Copy size={12}/>}
+                </button>
                 {/* Share */}
                 <button onClick={() => handleShare(mockup)} disabled={sharing === mockup.id} title={mockup.isPublic ? "Copy link" : "Share"} className="w-8 h-8 rounded-xl bg-surface-elevated border border-white/8 flex items-center justify-center text-text-secondary hover:text-text-primary hover:border-white/16 transition-all disabled:opacity-40">
                   {sharing === mockup.id ? <Loader2 size={12} className="animate-spin"/> : copiedId === mockup.id ? <Check size={12} className="text-green-400"/> : mockup.isPublic ? <Copy size={12}/> : <Share2 size={12}/>}

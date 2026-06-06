@@ -14,6 +14,7 @@ import { NotionFrame }   from "@/components/frames/notion";
 import { XcodeFrame }    from "@/components/frames/xcode";
 import { LinearFrame }   from "@/components/frames/linear";
 import { SlackFrame }    from "@/components/frames/slack";
+import { DiscordFrame }  from "@/components/frames/discord";
 import { FRAMES, type FrameId } from "@/components/frames";
 import { UpgradeModal }  from "@/components/pro/upgrade-modal";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,7 @@ function renderFrame(id: FrameId, win: ScreenWindow, mode: "dark"|"light") {
     case "xcode":    return <XcodeFrame    screenshot={p.screenshot} title={p.title} mode={p.mode} />;
     case "linear":   return <LinearFrame   screenshot={p.screenshot} title={p.title} mode={p.mode} />;
     case "slack":    return <SlackFrame    screenshot={p.screenshot} title={p.title} mode={p.mode} />;
+    case "discord":  return <DiscordFrame  screenshot={p.screenshot} title={p.title} mode={p.mode} />;
     default:         return <SafariFrame   {...p} />;
   }
 }
@@ -116,6 +118,18 @@ export function ScreenEditor({ mockupId, initialConfig, userRole = "user" }: Scr
     window.addEventListener("paste", handler);
     return () => window.removeEventListener("paste", handler);
   }, [activeWin]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (!meta) return;
+      if (e.key === "s") { e.preventDefault(); handleSave(); }
+      if (e.key === "e") { e.preventDefault(); handleExport(2); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frame, wallpaper, mode, showDock, windows, mockupTitle, mockupId, userRole]);
 
   const readFile = useCallback((file: File) => {
     const reader = new FileReader();
@@ -267,7 +281,7 @@ export function ScreenEditor({ mockupId, initialConfig, userRole = "user" }: Scr
             {/* App frame */}
             <section>
               <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">App Frame</p>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-4 gap-1.5">
                 {FRAMES.map(f => (
                   <button key={f.id} onClick={() => setFrame(f.id)} className={`py-2 px-1 rounded-xl text-xs font-medium transition-all border ${frame === f.id ? "bg-accent/15 border-accent/30 text-accent" : "bg-surface-elevated border-white/7 text-text-secondary hover:text-text-primary hover:border-white/15"}`}>
                     {f.label}
@@ -362,6 +376,8 @@ export function ScreenEditor({ mockupId, initialConfig, userRole = "user" }: Scr
             <div className="flex items-center gap-2 text-xs text-text-secondary">
               <Monitor size={13}/><span>Screen Mockup</span>
               {mockupId && <span className="text-accent">· Editing</span>}
+              <span className="hidden sm:inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded-md bg-surface-elevated border border-white/7 text-[10px] text-text-secondary font-mono">⌘S</span>
+              <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-elevated border border-white/7 text-[10px] text-text-secondary font-mono">⌘E</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-0.5 bg-surface-elevated rounded-xl border border-white/7 p-0.5">

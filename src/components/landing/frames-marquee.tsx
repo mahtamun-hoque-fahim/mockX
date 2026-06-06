@@ -11,6 +11,7 @@ const FRAMES_SHOWCASE = [
   { label: "Xcode",    desc: "Apple Xcode",           color: "#1a73e8" },
   { label: "Linear",   desc: "Linear Issues",         color: "#5e6ad2" },
   { label: "Slack",    desc: "Slack",                 color: "#4a154b" },
+  { label: "Discord",  desc: "Discord",               color: "#5865f2" },
 ];
 
 // SVG path for a generic monitor/window icon per frame
@@ -40,7 +41,7 @@ export function FramesMarquee() {
     <section id="frames" className="py-20 overflow-hidden border-t border-white/5">
       <div className="text-center mb-10 px-6">
         <h2 className="font-syne font-bold text-4xl text-text-primary mb-3">
-          12 app frames
+          13 app frames
         </h2>
         <p className="text-text-secondary text-lg">
           Browser, IDE, design tool, or native macOS — every workflow covered

@@ -6,11 +6,15 @@ import { SafariFrame }  from "@/components/frames/safari";
 import { ChromeFrame }  from "@/components/frames/chrome";
 import { ArcFrame }     from "@/components/frames/arc";
 import { FirefoxFrame } from "@/components/frames/firefox";
+import { VSCodeFrame }   from "@/components/frames/vscode";
+import { FinderFrame }   from "@/components/frames/finder";
+import { TerminalFrame } from "@/components/frames/terminal";
 import { FigmaFrame }    from "@/components/frames/figma";
 import { NotionFrame }   from "@/components/frames/notion";
 import { XcodeFrame }    from "@/components/frames/xcode";
 import { LinearFrame }   from "@/components/frames/linear";
 import { SlackFrame }    from "@/components/frames/slack";
+import { DiscordFrame }  from "@/components/frames/discord";
 import { FRAMES, type FrameId } from "@/components/frames";
 import { MacBookAir13 } from "@/components/macbook/macbook-air-13";
 import { MacBookAir15 } from "@/components/macbook/macbook-air-15";
@@ -53,15 +57,22 @@ function isPro(role: string) { return role === "pro" || role === "admin"; }
 
 function renderFrame(id: FrameId, screenshot: string|null, url: string, mode: "dark"|"light") {
   const p = { screenshot, url, mode };
-  if (id === "chrome")  return <ChromeFrame  {...p} />;
-  if (id === "arc")     return <ArcFrame     {...p} />;
-  if (id === "firefox") return <FirefoxFrame {...p} />;
-  if (id === "figma")   return <FigmaFrame   screenshot={p.screenshot} mode={p.mode} />;
-  if (id === "notion")  return <NotionFrame  screenshot={p.screenshot} mode={p.mode} />;
-  if (id === "xcode")   return <XcodeFrame   screenshot={p.screenshot} mode={p.mode} />;
-  if (id === "linear")  return <LinearFrame  screenshot={p.screenshot} mode={p.mode} />;
-  if (id === "slack")   return <SlackFrame   screenshot={p.screenshot} mode={p.mode} />;
-  return                       <SafariFrame  {...p} />;
+  switch (id) {
+    case "safari":   return <SafariFrame   {...p} />;
+    case "chrome":   return <ChromeFrame   {...p} />;
+    case "arc":      return <ArcFrame      {...p} />;
+    case "firefox":  return <FirefoxFrame  {...p} />;
+    case "vscode":   return <VSCodeFrame   screenshot={p.screenshot} mode={p.mode} />;
+    case "finder":   return <FinderFrame   screenshot={p.screenshot} mode={p.mode} />;
+    case "terminal": return <TerminalFrame screenshot={p.screenshot} mode={p.mode} />;
+    case "figma":    return <FigmaFrame    screenshot={p.screenshot} mode={p.mode} />;
+    case "notion":   return <NotionFrame   screenshot={p.screenshot} mode={p.mode} />;
+    case "xcode":    return <XcodeFrame    screenshot={p.screenshot} mode={p.mode} />;
+    case "linear":   return <LinearFrame   screenshot={p.screenshot} mode={p.mode} />;
+    case "slack":    return <SlackFrame    screenshot={p.screenshot} mode={p.mode} />;
+    case "discord":  return <DiscordFrame  screenshot={p.screenshot} mode={p.mode} />;
+    default:         return <SafariFrame   {...p} />;
+  }
 }
 
 function MacBookShell({ modelId, colorId, children }: { modelId: string; colorId: string; children: React.ReactNode }) {
@@ -113,6 +124,18 @@ export function SceneEditor({ mockupId, initialConfig, userRole = "user" }: Scen
     window.addEventListener("paste", handler);
     return () => window.removeEventListener("paste", handler);
   }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (!meta) return;
+      if (e.key === "s") { e.preventDefault(); handleSave(); }
+      if (e.key === "e") { e.preventDefault(); handleExport(2); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modelId, colorId, deskEnvId, outerBgId, dayNight, wallpaperId, frame, mode, url, screenshot, mockupTitle, mockupId, userRole]);
 
   const readFile = useCallback((file: File) => {
     const reader = new FileReader();
@@ -187,6 +210,7 @@ export function SceneEditor({ mockupId, initialConfig, userRole = "user" }: Scen
   };
 
   const pro = isPro(userRole);
+  const currentFrame = FRAMES.find(f => f.id === frame) ?? FRAMES[0];
   const currentModel = MACBOOK_MODELS.find(m => m.id === modelId)!;
   const deskEnv  = DESK_ENVS.find(d => d.id === deskEnvId)  ?? DESK_ENVS[0];
   const outerBg  = OUTER_BGS.find(b => b.id === outerBgId)  ?? OUTER_BGS[0];
@@ -265,8 +289,8 @@ export function SceneEditor({ mockupId, initialConfig, userRole = "user" }: Scen
 
             <section>
               <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">App Frame</p>
-              <div className="grid grid-cols-3 gap-1.5">
-                {FRAMES.filter(f => f.supportsUrl).map(f => (
+              <div className="grid grid-cols-4 gap-1.5">
+                {FRAMES.map(f => (
                   <button key={f.id} onClick={() => setFrame(f.id)} className={`py-2 px-1 rounded-xl border text-xs font-medium transition-all ${frame === f.id ? "bg-accent/15 border-accent/30 text-accent" : "bg-surface-elevated border-white/7 text-text-secondary hover:border-white/15"}`}>
                     {f.label}
                   </button>
@@ -286,10 +310,12 @@ export function SceneEditor({ mockupId, initialConfig, userRole = "user" }: Scen
               </div>
             </section>
 
-            <section>
-              <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">URL</p>
-              <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://yoursite.com" className="text-xs" />
-            </section>
+            {currentFrame.supportsUrl && (
+              <section>
+                <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">URL</p>
+                <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://yoursite.com" className="text-xs" />
+              </section>
+            )}
 
             <section>
               <p className="text-[10px] uppercase tracking-widest text-text-secondary mb-2 font-medium">Screenshot</p>
@@ -319,6 +345,8 @@ export function SceneEditor({ mockupId, initialConfig, userRole = "user" }: Scen
             <div className="flex items-center gap-2 text-xs text-text-secondary">
               <Laptop size={13}/><span>Scene Mockup</span>
               {mockupId && <span className="text-accent">· Editing</span>}
+              <span className="hidden sm:inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded-md bg-surface-elevated border border-white/7 text-[10px] text-text-secondary font-mono">⌘S</span>
+              <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-elevated border border-white/7 text-[10px] text-text-secondary font-mono">⌘E</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-0.5 bg-surface-elevated rounded-xl border border-white/7 p-0.5">
