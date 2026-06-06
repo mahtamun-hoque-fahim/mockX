@@ -109,6 +109,8 @@ export function ScreenEditor({ mockupId, initialConfig, userRole = "user" }: Scr
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileRef   = useRef<HTMLInputElement>(null);
+  // Stable ref so keyboard handler always sees latest callbacks
+  const actionsRef = useRef({ handleSave: () => {}, handleExport: (_s: number) => {} });
 
   useEffect(() => {
     const handler = (e: ClipboardEvent) => {
@@ -123,13 +125,12 @@ export function ScreenEditor({ mockupId, initialConfig, userRole = "user" }: Scr
     const handler = (e: KeyboardEvent) => {
       const meta = e.metaKey || e.ctrlKey;
       if (!meta) return;
-      if (e.key === "s") { e.preventDefault(); handleSave(); }
-      if (e.key === "e") { e.preventDefault(); handleExport(2); }
+      if (e.key === "s") { e.preventDefault(); actionsRef.current.handleSave(); }
+      if (e.key === "e") { e.preventDefault(); actionsRef.current.handleExport(2); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [frame, wallpaper, mode, showDock, windows, mockupTitle, mockupId, userRole]);
+  }, []); // stable — reads through actionsRef
 
   const readFile = useCallback((file: File) => {
     const reader = new FileReader();
@@ -237,6 +238,10 @@ export function ScreenEditor({ mockupId, initialConfig, userRole = "user" }: Scr
   const pro = isPro(userRole);
   const currentFrame = FRAMES.find(f => f.id === frame)!;
   const win = windows[activeWin] ?? windows[0];
+
+  // Keep actionsRef current so the stable keyboard handler always invokes latest fns
+  actionsRef.current.handleSave   = handleSave;
+  actionsRef.current.handleExport = handleExport;
 
   return (
     <>

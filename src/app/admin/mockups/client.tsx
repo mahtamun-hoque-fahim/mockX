@@ -32,7 +32,7 @@ export function AdminMockupsClient({ initialRows }: { initialRows: Row[] }) {
     if (!anyChecked) return;
     setDeleting(true);
     const ids = [...selected];
-    await Promise.all(ids.map(id => fetch(`/api/mockups/${id}`, { method: "DELETE" })));
+    await Promise.all(ids.map(id => fetch(`/api/admin/mockups/${id}`, { method: "DELETE" })));
     setRows(prev => prev.filter(r => !selected.has(r.mockup.id)));
     setSelected(new Set());
     setDeleting(false);

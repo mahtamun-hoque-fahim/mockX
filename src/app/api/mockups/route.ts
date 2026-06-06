@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { mockups } from "@/lib/db/schema";
-import { eq, desc, lt, sql } from "drizzle-orm";
+import { eq, desc, lt, and, sql } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 
 const PAGE_SIZE = 20;
@@ -18,11 +18,11 @@ export async function GET(req: NextRequest) {
   const query = db.select().from(mockups)
     .where(
       cursor
-        ? sql`${mockups.userId} = ${session.user.id} AND ${mockups.createdAt} < ${new Date(cursor)}`
+        ? and(eq(mockups.userId, session.user.id), lt(mockups.createdAt, new Date(cursor)))
         : eq(mockups.userId, session.user.id)
     )
     .orderBy(desc(mockups.createdAt))
-    .limit(PAGE_SIZE + 1); // fetch one extra to know if there's a next page
+    .limit(PAGE_SIZE + 1);
 
   const rows = await query;
   const hasMore = rows.length > PAGE_SIZE;
